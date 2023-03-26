@@ -1,7 +1,7 @@
 import ipads from "../data/ipads.js";
 import navigations from "../data/navigations.js";
 
-// 장바구니
+// PC 장바구니 토스트 팝업
 const basketStarterEl = document.querySelector("header .basket-starter");
 const basketEl = basketStarterEl.querySelector(".basket");
 
@@ -29,7 +29,7 @@ const hideBasket = () => {
   basketEl.classList.remove("show");
 };
 
-// 검색
+// PC 검색창 애니메이션
 const headerEl = document.querySelector("header");
 const headerMenuEls = [...headerEl.querySelectorAll("ul.menu > li")];
 const searchWrapEl = headerEl.querySelector(".search-wrap");
@@ -41,7 +41,7 @@ const searchDelayEls = [...searchWrapEl.querySelectorAll("li")];
 
 const showSearch = () => {
   headerEl.classList.add("searching");
-  document.documentElement.classList.add("fixed");
+  stopScroll();
 
   headerMenuEls.reverse().forEach((el, index) => {
     el.style.transitionDelay = (index * 0.4) / headerMenuEls.length + "s";
@@ -58,7 +58,7 @@ const showSearch = () => {
 
 const hideSearch = () => {
   headerEl.classList.remove("searching");
-  document.documentElement.classList.remove("fixed");
+  playScroll();
 
   headerMenuEls.reverse().forEach((el, index) => {
     el.style.transitionDelay = (index * 0.4) / headerMenuEls.length + "s";
@@ -71,9 +71,77 @@ const hideSearch = () => {
   searchInputEl.value = "";
 };
 
+const playScroll = () => {
+  document.documentElement.classList.remove("fixed");
+};
+const stopScroll = () => {
+  document.documentElement.classList.add("fixed");
+};
+
 searchStarterEl.addEventListener("click", showSearch);
-searchCloserEl.addEventListener("click", hideSearch);
+searchCloserEl.addEventListener("click", (event) => {
+  event.stopPropagation();
+  hideSearch();
+});
 searchShadowEl.addEventListener("click", hideSearch);
+
+// 모바일 메뉴 토글
+const menuStarterEl = document.querySelector("header .menu-starter");
+menuStarterEl.addEventListener("click", () => {
+  if (headerEl.classList.contains("menuing")) {
+    headerEl.classList.remove("menuing");
+    searchInputEl.value = "";
+    playScroll();
+  } else {
+    headerEl.classList.add("menuing");
+    stopScroll();
+  }
+});
+
+// 모바일 메뉴 검색
+const searchTextFieldEl = document.querySelector("header .textfield");
+const searchCancelEl = document.querySelector("header .search-canceler");
+searchTextFieldEl.addEventListener("click", () => {
+  headerEl.classList.add("searching--mobile");
+  searchInputEl.focus();
+});
+searchCancelEl.addEventListener("click", () => {
+  headerEl.classList.remove("searching--mobile");
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth <= 740) {
+    headerEl.classList.remove("searching");
+  } else {
+    headerEl.classList.remove("searching--mobile");
+  }
+});
+
+// 모바일 네비게이션
+const navEl = document.querySelector("nav");
+const navMenuToggleEl = navEl.querySelector(".menu-toggler");
+const navMenuShadowEl = navEl.querySelector(".shadow");
+
+navMenuToggleEl.addEventListener("click", () => {
+  if (navEl.classList.contains("menuing")) {
+    hidewNavMenu();
+  } else {
+    showNavMenu();
+  }
+});
+
+const showNavMenu = () => {
+  navEl.classList.add("menuing");
+};
+const hidewNavMenu = () => {
+  navEl.classList.remove("menuing");
+};
+
+navEl.addEventListener("click", (event) => {
+  event.stopPropagation();
+});
+navMenuShadowEl.addEventListener("click", hidewNavMenu);
+window.addEventListener("click", hidewNavMenu);
 
 // 요소의 가시성 관찰
 const io = new IntersectionObserver((entries) => {
@@ -90,7 +158,7 @@ infoEls.forEach((el) => {
   io.observe(el);
 });
 
-// 비디오 재생!
+// 비디오 재생
 const video = document.querySelector(".stage video");
 const playBtn = document.querySelector(".stage .controller--play");
 const pauseBtn = document.querySelector(".stage .controller--pause");
@@ -134,6 +202,7 @@ ipads.forEach((ipad) => {
   itemsEl.append(itemEl);
 });
 
+// 풋터 네비게이션
 const navigationEl = document.querySelector("footer .navigations");
 navigations.forEach((nav) => {
   const mapEl = document.createElement("div");
@@ -151,6 +220,7 @@ navigations.forEach((nav) => {
   mapEl.innerHTML = /* html */ `
   <h3>
     <span class="text">${nav.title}</span>
+    <span class="icon">+</span>
   </h3>
   <ul>
     ${mapList}
@@ -160,5 +230,15 @@ navigations.forEach((nav) => {
   navigationEl.append(mapEl);
 });
 
+// 풋터 카피라이트
 const thisYearEl = document.querySelector("span.this-year");
 thisYearEl.textContent = new Date().getFullYear();
+
+//
+const mapEls = document.querySelectorAll("footer .navigations .map");
+mapEls.forEach((el) => {
+  const h3El = el.querySelector("h3");
+  h3El.addEventListener("click", () => {
+    el.classList.toggle("active");
+  });
+});
